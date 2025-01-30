@@ -9,6 +9,7 @@ from crewai import Agent, Task, Crew
 from pydantic import BaseModel, Field
 from typing import List
 from helper import load_env
+import pandas as pd
 
 # Suppress warnings
 warnings.filterwarnings('ignore')

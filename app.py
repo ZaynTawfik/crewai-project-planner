@@ -61,13 +61,8 @@ crew = Crew(
 
 # Streamlit UI
 st.set_page_config(page_title="AI Project Planner", layout="wide")
-st.title("🚀 CrewAI Project Planner")
-st.markdown("Define your project details and let AI generate a structured project plan.")
-
-# Streamlit UI
-
-st.title("🚀 AI-Powered Project Planner")
-st.write("This tool helps plan and estimate project timelines using AI agents.")
+st.title("🚀 MAPP: Multi Agent Project Planner")
+st.write("⚡Effortless project planning with AI-driven task breakdowns, time estimates, and milestone planning ⚡")
 
 # User input form
 with st.form("project_input_form"):

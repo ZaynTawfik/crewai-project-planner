@@ -46,6 +46,11 @@ class ProjectPlan(BaseModel):
 st.title("🚀 CrewAI Project Planner")
 st.markdown("Define your project details and let AI generate a structured project plan.")
 
+# Streamlit UI
+st.set_page_config(page_title="AI Project Planner", layout="wide")
+st.title("🚀 AI-Powered Project Planner")
+st.write("This tool helps plan and estimate project timelines using AI agents.")
+
 # User Inputs
 project = st.text_input("Project Type", "Website")
 industry = st.text_input("Industry", "Technology")

@@ -87,3 +87,16 @@ if st.button("Generate Project Plan"):
         st.subheader("📋 Generated Project Plan")
         st.write(result.json(indent=2))
 
+        tasks = result.pydantic.dict().get('tasks', [])
+        if tasks:
+            df_tasks = pd.DataFrame(tasks)
+            st.subheader("📌 Task Breakdown")
+            st.dataframe(df_tasks)
+
+        # Display Milestones
+        milestones = result.pydantic.dict().get('milestones', [])
+        if milestones:
+            df_milestones = pd.DataFrame(milestones)
+            st.subheader("🏆 Project Milestones")
+            st.dataframe(df_milestones)
+

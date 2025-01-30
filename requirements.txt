@@ -3,3 +3,4 @@ crewai
 pyyaml
 pydantic
 python-dotenv
+pysqlite3-binary

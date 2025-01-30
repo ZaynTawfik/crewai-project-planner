@@ -40,7 +40,23 @@ class Milestone(BaseModel):
 class ProjectPlan(BaseModel):
     tasks: List[TaskEstimate] = Field(..., description="List of tasks with their estimates")
     milestones: List[Milestone] = Field(..., description="List of project milestones")
+        
+# Create agents
+project_planning_agent = Agent(config=agents_config['project_planning_agent'])
+estimation_agent = Agent(config=agents_config['estimation_agent'])
+resource_allocation_agent = Agent(config=agents_config['resource_allocation_agent'])
 
+# Create tasks
+task_breakdown = Task(config=tasks_config['task_breakdown'], agent=project_planning_agent)
+time_resource_estimation = Task(config=tasks_config['time_resource_estimation'], agent=estimation_agent)
+resource_allocation = Task(config=tasks_config['resource_allocation'], agent=resource_allocation_agent, output_pydantic=ProjectPlan)
+
+# Create Crew
+crew = Crew(
+        agents=[project_planning_agent, estimation_agent, resource_allocation_agent],
+        tasks=[task_breakdown, time_resource_estimation, resource_allocation],
+        verbose=True
+    )
 
 # Streamlit UI
 st.set_page_config(page_title="AI Project Planner", layout="wide")
@@ -52,51 +68,40 @@ st.markdown("Define your project details and let AI generate a structured projec
 st.title("🚀 AI-Powered Project Planner")
 st.write("This tool helps plan and estimate project timelines using AI agents.")
 
-# User Inputs
-project = st.text_input("Project Type", "Website")
-industry = st.text_input("Industry", "Technology")
-project_objectives = st.text_area("Project Objectives", "Create a website for a small business")
-team_members = st.text_area("Team Members", "- John Doe (PM)\n- Jane Doe (Developer)")
-project_requirements = st.text_area("Project Requirements", "- Responsive design\n- SEO Optimization")
+# User input form
+with st.form("project_input_form"):
+    project = st.text_input("Project Name", "Website")
+    industry = st.text_input("Industry", "Technology")
+    project_objectives = st.text_area("Project Objectives", "Create a website for a small business")
+    team_members = st.text_area("Team Members", "- John Doe (Project Manager)\n- Jane Doe (Software Engineer)")
+    project_requirements = st.text_area("Project Requirements", "- Responsive design\n- Modern UI\n- SEO optimization")
+    
+    submit = st.form_submit_button("Generate Project Plan")
 
-# Button to generate plan
-if st.button("Generate Project Plan"):
-    with st.spinner("AI is generating your project plan..."):
+# Run Crew AI system when user submits
+if submit:
+    inputs = {
+        'project_type': project,
+        'project_objectives': project_objectives,
+        'industry': industry,
+        'team_members': team_members,
+        'project_requirements': project_requirements
+    }
+    
+    st.write("⏳ Running AI Agents to generate your project plan...")
+    result = crew.kickoff(inputs=inputs)
+    st.success("✅ Project Plan Generated!")
 
-        # Create agents
-        project_planning_agent = Agent(config=agents_config['project_planning_agent'])
-        estimation_agent = Agent(config=agents_config['estimation_agent'])
-        resource_allocation_agent = Agent(config=agents_config['resource_allocation_agent'])
+    # Display Task Breakdown
+    tasks = result.pydantic.dict().get('tasks', [])
+    if tasks:
+        df_tasks = pd.DataFrame(tasks)
+        st.subheader("📌 Task Breakdown")
+        st.dataframe(df_tasks)
 
-        # Create tasks
-        task_breakdown = Task(config=tasks_config['task_breakdown'], agent=project_planning_agent)
-        time_resource_estimation = Task(config=tasks_config['time_resource_estimation'], agent=estimation_agent)
-        resource_allocation = Task(config=tasks_config['resource_allocation'], agent=resource_allocation_agent, output_pydantic=ProjectPlan)
-
-        # Create Crew
-        crew = Crew(
-            agents=[project_planning_agent, estimation_agent, resource_allocation_agent],
-            tasks=[task_breakdown, time_resource_estimation, resource_allocation],
-            verbose=True
-        )
-
-        # Execute Crew
-        result = crew.kickoff()
-
-        # Display Results
-        st.subheader("📋 Generated Project Plan")
-        st.write(result.json(indent=2))
-
-        tasks = result.pydantic.dict().get('tasks', [])
-        if tasks:
-            df_tasks = pd.DataFrame(tasks)
-            st.subheader("📌 Task Breakdown")
-            st.dataframe(df_tasks)
-
-        # Display Milestones
-        milestones = result.pydantic.dict().get('milestones', [])
-        if milestones:
-            df_milestones = pd.DataFrame(milestones)
-            st.subheader("🏆 Project Milestones")
-            st.dataframe(df_milestones)
-
+    # Display Milestones
+    milestones = result.pydantic.dict().get('milestones', [])
+    if milestones:
+        df_milestones = pd.DataFrame(milestones)
+        st.subheader("🏆 Project Milestones")
+        st.dataframe(df_milestones)

@@ -92,7 +92,7 @@ if submit:
     st.write("⏳ Running AI Agents to generate your project plan...")
     result = crew.kickoff(inputs=inputs)
     st.success("✅ Project Plan Generated!")
-
+    st.write(result.pydantic.dict())
     # Display Task Breakdown
     tasks = result.pydantic.dict().get('tasks', [])
     if tasks:
